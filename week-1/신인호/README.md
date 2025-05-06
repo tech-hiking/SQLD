@@ -261,11 +261,7 @@ ORDER BY   6
 
 </aside>
 
-- 118p 문제
-
-  정답 3
-
-![image.png](attachment:c00a4791-e280-404e-8ba6-7508ffc568b2:image.png)
+- `p 118 문제`
 
 ## 6. ORDER BY 절
 
@@ -421,5 +417,3 @@ SELECT A.NAME,
 ```
 
 - `p 147 문제`
-
-  ![image.png](attachment:7bab7dd0-411d-4186-9b45-7dfb627be50d:image.png)
