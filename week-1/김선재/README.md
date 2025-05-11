@@ -210,7 +210,7 @@ String *Item_func_trim::val_str(String *str) {
 }
 ```
 
-- MySQL Server 에서는 `memcmp` 비교로 문자열 시퀀스 전체를 비교하는 것처럼 보이지만, 실제 동작은 문자 집합 내에 속하면 삭제하는 동작이다.
+- MySQL Server 에서는 `memcmp` 비교로 문자열 시퀀스 전체를 비교한다.
 
 ### 3. PostgreSQL
 
