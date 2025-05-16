@@ -339,3 +339,233 @@
 # PART2. SQL 기본 및 활용
 
 ## CHAPTER3. 관리 구문
+
+### 1. DDL (Data Definition Language)
+
+#### (1) CREATE
+
+```sql
+CREATE TABLE TB(
+  C1 데이터 타입(DEFAULT/ NULL여부)
+)
+
+CREATE TABLE TB(
+  C1 NUMBER NOT NULL,
+  C2 VARCHAR(20)
+  CONSTRAINT PK PRIMARY KEY (C1)
+  CONSTRAINT FK PRIMARY KEY (C2) REFERENCES TB2(C2)
+)
+
+-- 테이블 복사
+CREATE TB AS SELECT * FROM 원본테이블;
+```
+
+- 테이블 생성
+- 데이터 타입
+  - 문자 : CHAR(고정), VARCHAR(가변, 스페이스바를 문자로 취급), CLOB
+  - 숫자 : NUMBER
+  - 날짜 : DATE
+- 규칙
+  - 테이블명 고유
+  - 한 테이블 내에서는 컬럼명 고유
+  - 컬럼명 뒤 데이터 유형과 크기 명시
+  - 컬럼 정의는 괄호 안에
+  - 테이블명과 컬럼명은 숫자로 시작 X
+  - 마지막은 세미콜론으로 끝
+- CONSTRAINT : 제약조건 정의
+  - PRIMARY KEY(기본키) : 고유성을 보장하고 NULL 불가능
+  - UNIQUE KEY(고유키) : 고유성을 보장하지만 NULL가능
+  - NOT NULL
+  - CHECK() : 컬럼에 저장될 수 있는 값의 범위 (ex) CHECK(C1 IN ('A','B')) C1는 A 또는 B만 가능
+  - FOREIGN KEY(외래키)
+    - 참조 무결정 규정 옵션 선택 가능
+    1. CASCADE : PARENT값 삭제 시 CHILD값 같이 삭제
+    2. SET NULL : PARENT값 삭제 시 CHILD의 해당 컬럼 NULL처리
+    3. SET DEFAULT : PARENT값 삭제 시 CHILD의 해당 컬럼 DEFAULT 값으로 변경
+    4. RESTRICT : CHILD 테이블에 해당 데이터가 PK로 존재하지 않는 경우에만 PARENT값 삭제 및 수정 가능
+    5. NO ACTION : 참조 무결성이 걸려있는 경우 삭제 및 수정 불가
+- 테이블을 복사할 경우 NOT NULL조건만 복사되고 나머지 제약조건은 초기화됨
+
+#### (2) ALTER
+
+```sql
+ALTER TABLE TB ADD C1 DATATYPE
+
+ALTER TABLE TB DROP COLUMN C1
+
+ALTER TABLE TB MODIFY (C1 DATATYPE [DEFAULT값] [NOT NULL],,,)
+
+ALTER TABLE TB RENAME COLUMN 기존컬럼 TO 변경할 컬럼
+
+ALTER TABLE TB ADD CONSTRAINT 제약조건명 제약조건(C1)
+```
+
+- 테이블 구조를 변경하는 경우 사용
+- ADD : 컬럼 추가, 맨 끝에 위치함(위치 지정 X)
+- DROP COLUMN : 기존 컬럼 삭제, 복구 X
+- MODIFY : 컬럼을 변경, 컬럼에 저장된 모든 데이터가 새로 지정한 크기보다 작아야함, 컬럼에 저장된 데이터가 없는 경우만 유형 변경 가능, NULL이 없을 경우에만 NOT NULL 추가 가능
+- RENAME COLUMN(컬럼 이름 변경), ADD CONSTRAINT(제약조건 추가)
+
+#### (3) DROP
+
+```sql
+DROP TABLE TB [CASCADE CONSTRAINT];
+```
+
+- 테이블을 삭제할 때 쓰는 명령어
+- 해당 테이블이 참조하고 있는 다른 테이블이 존재하는 경우 CASCADE 옵션을 명시하지 않으면 삭제되지 않음
+- CASCADE CONSTRAINT : 참조 제약조건도 함께 삭제한다는 의미
+
+#### (4) RENAME
+
+```sql
+RENAME A TO B
+```
+
+#### (5) TRUNCATE
+
+```sql
+TRUNCATE TABLE TB
+```
+
+- 테이블에 저장되어 있는 데이터를 모두 제거하는 명령어
+
+---
+
+### 2. DML (Data Manipulation Language)
+
+- DDL에서 정의한 대로 데이터를 입력하고, 입력된 데이터를 수정, 삭제, 조회하는 명령
+
+#### (1) INSERT
+
+```sql
+INSERT INTO TB (C1,C2) VALUES(DATA1,DATA2) -- C1속성에 DATA1, C2속성에 DATA2
+
+INSERT INTO TB VALUES(전체 컬럼에 입력될 데이터 리스트)
+```
+
+- 데이터 입력 명령어
+- 명시되지 않은 컬럼에는 NULL값이 입력됨 (PK, NOT NULL 제약조건 주의)
+- 리스트로 입력할 경우, 순서와 전체 컬럼수에 맞춰야함
+
+#### (2) UPDATE
+
+```sql
+UPDATE TB SET C1=D1 (WHERE 조건)
+```
+
+- 이미 저장된 데이터를 수정하는 명령어
+- WHERE절이 없으면 테이블의 모든 Row가 변경됨
+- SET 구분='경력' 와 같이 표현
+- SET COL1=COL2+COL3 와 같은 연산도 가능
+
+#### (3) DELETE
+
+```sql
+DELETE FROM TB (WHERE 조건)
+```
+
+- 저장된 데이터를 삭제하고 싶을때 사용하는 명령어
+- WHERE절이 없으면 테이블의 모든 ROW가 삭제됨
+- 데이터 삭제 명령어 비교
+  1. TRUNCATE : 전체 초기화
+     - ROLLBACK 대부분 불가능
+     - 완전히 삭제할 경우는 TRUNCATE가 부하 측면에서 유리
+     - WHERE 불가능
+     - 테이블 구조 유지
+  2. DROP : 테이블 폐기
+     - ROLLBACK 불가능
+     - WHERE 불가능
+     - 테이블 구조도 사라짐
+  3. DELETE : 조건별 데이터 삭제
+     - ROLLBACK 가능
+     - WHERE 가능
+     - 테이블 구조 유지
+
+#### (4) MERGE
+
+```sql
+MERGE
+  INTO 타겟 테이블
+  USING 비교 테이블 -- 특정 조건의 데이터만 가능 (SELECT문으로 가능)
+    ON 조건 -- (A.ID=B.ID)
+  WHEN MATCHED THEN
+      UPDATE
+        SET C1=새로운 데이터 [,C2=새로운 데이터,,,]
+  WHEN NOT MATCHED THEN
+      INSERT [(C1,C2,,,)]
+      VALUES (D1,D2,,,)
+```
+
+- 테이블에 새로운 데이터를 입력하거나 이미 저장되어 있는 데이터에 대한 변경 작업을 한번에 할 수 있도록 해주는 명령어
+- WHEN MATCHED THEN : 조건에 맞는 데이터가 있으면 ~
+- WHEN NOT MATCHED THEN : 조건에 맞는 데이터가 없으면 그 데이터를 ~
+
+---
+
+### 3. TCL (Transaction Control Language)
+
+#### (1) COMMIT
+
+- INSERT, DELETE, UPDATE 후 변경된 내용을 확정, 반영하는 명령어
+- COMMIT을 실행하지 않으면 메모리에만 반영 -> 메모리는 휘발성이며 다른 사용자는 조회 X
+- COMMIT을 실행해야 최종적으로 데이터 파일에 기록되고 트랜잭션이 완료됨
+- UPDATE한 뒤, 오랜 시간 동안 COMMIT이나 ROLLBACK을 하지 않으면 LOCK
+
+#### (2) ROLLBACK
+
+- INSERT, DELETE, UPDATE 후 변경된 내용을 취소하는 명령어
+- 변경하기 이전 값으로 복구
+- UPDATE한 뒤, 오랜 시간 동안 COMMIT이나 ROLLBACK을 하지 않으면 LOCK
+
+#### (3) SAVEPOINT
+
+- ROLLACK을 수행할 때 일부만 되돌릴 수 있게 하는 명령어
+
+```sql
+...
+SAVEPOINT A;
+...
+ROLLBACK TO A
+```
+
+---
+
+### 4. DDL (Data Definition Language)
+
+- USER를 생성하고 데이터 컨트롤 권한을 관리하는 명령어
+
+#### (1) USER
+
+```sql
+CREATE USER A IDENTIFIED BY PWD;
+
+ALTER USER A IDENTIFIED BY PWD;
+
+DROP USER A;
+```
+
+#### (2) GRANT
+
+```sql
+GRANT 권한 TO A;
+
+REVOKE 권한 FROM A;
+```
+
+- 권한
+  - CREATE SESSION
+  - CREATE USER
+  - CREATE TABLE
+
+#### (3) ROLE
+
+- 특정 권한들을 하나의 세트로 묶어서 부여하는 것
+
+```sql
+CREATE ROLE R1;
+
+GRANT 권한 TO R1;
+
+GRANT R1 TO A;
+```
